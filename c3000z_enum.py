@@ -140,6 +140,22 @@ def getDefaultPPP(d):
 	password = bs.find_all('BackupPassword')[0].get_text()
 	print("\tDefaultPPP Backup Username:\t%s" % username)
 	print("\tDefaultPPP Backup Password:\t%s" % decodePassword(password))
+
+
+def getWifi(d):
+	wifi = d.find_all("WLANConfiguration")
+	for i in wifi:
+		w = xmlHeader + str(i)
+		try:
+			bs = BeautifulSoup(w, 'xml')
+			ssid = bs.find_all('SSID')[0].get_text()
+			psk = bs.find_all('PreSharedKey')[0].get_text()
+			print("\tWifi SSID:\t\t\t%s" % ssid)
+			print("\tWifi PSK:\t\t\t%s" % str(psk).lstrip().rstrip())
+			print()
+		except:
+			continue
+
 	
 
 def parseConfig(confData):
@@ -158,6 +174,8 @@ def parseConfig(confData):
 	getWANPPP(d)
 	print()
 	getDefaultPPP(d)
+	print()
+	getWifi(d)
 	print()
 	print("[+] Completed parsing the config file")
 	print()
