@@ -1,5 +1,7 @@
 # C3000Z
-Script to decode the passwords from the ZYXEL C3000Z router config file
+Script to decode the passwords from the ZYXEL C3000Z router config file. If you are interested in how I discovered how to decode the passwords you can view the details here: https://lum8rjack.github.io/posts/c3000z/
+
+## Overview
 
 The Zyxel C3000Z modem/WiFi router is widely used by CenturyLink. The router allows the owner to download and backup the current router configurations. This backup config file not only has the WiFi details and passwords but it has the login credentials to login to the router and the PPP credentials for the router to connect to the Internet vie PPoE. The login and PPP passwords are encoded. This script will read in the config file and decode the passwords based on the default key CenturyLink used.
 
