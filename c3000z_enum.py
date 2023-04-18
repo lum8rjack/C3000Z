@@ -16,9 +16,9 @@ def decodePassword(pwd):
 		p = pwd + "\n"
 		f.write(p)
 		f.close()
-		out = subprocess.Popen(['openssl', 'des', '-in', fn, "-d", "-k", KEY, "-a", "-md", "md5"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		out = subprocess.Popen(["openssl", "des", "-in", fn, "-d", "-k", KEY, "-a", "-md", "md5"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
 		stdout,stderr = out.communicate()
-		sout = stdout.decode("utf-8").split("\n")[2]
+		sout = stdout.decode("utf-8")[:-1]
 		os.remove(fn)
 
 	except:
@@ -37,7 +37,6 @@ def getAdminPwd(d):
 
 def instanceUsers(d):
 	iuser= d.find_all('User')
-	#wp = xmlHeader
 	
 	for u in iuser:
 		e = "False"
