@@ -1,2 +1,6 @@
 # config files
 *.xml
+
+# binaries
+*.exe
+*.bin

@@ -3,28 +3,10 @@ Script to decode the passwords from the ZYXEL C3000Z router config file. If you 
 
 ## Overview
 
-The Zyxel C3000Z modem/WiFi router is widely used by CenturyLink. The router allows the owner to download and backup the current router configurations. This backup config file not only has the WiFi details and passwords but it has the login credentials to login to the router and the PPP credentials for the router to connect to the Internet vie PPoE. The login and PPP passwords are encoded. This script will read in the config file and decode the passwords based on the default key CenturyLink used.
+The Zyxel C3000Z modem/WiFi router is widely used by CenturyLink. The router allows the owner to download and backup the current router configurations. This backup config file not only has the WiFi details and passwords but it has the login credentials to login to the router and the PPP credentials for the router to connect to the Internet vie PPoE. The login and PPP passwords are encoded. This code will take the key and password to decrypt the password.
 
-## Tested
-This script was tested on a configuration file that was pulled from a router with firmware version: CZD005-4.16.011.0
+## Download Router Config
 
-You can download the firmware version here: http://internethelp.centurylink.com/internethelp/modems/c3000z/firmware/CZD005-4.16.011.0.bin
-
-## Install
-This script uses Python3 and you will need to make sure the additional dependicies are installed using pip3
-
-~~~
-pip3 install -r requirements.txt
-~~~
-
-### Docker
-A dockerfile has also been created that can be used instead. Run the build.sh command to build the image. Once built, you can run the following command to supply the config file to docker for it to parse.
-
-~~~
-docker run --rm -v $(pwd)/<your config file>.xml:/app/config.xml c3000z
-~~~
-
-## Download Config
 Downloading the configuration file can be done by:
 
 1. Browse to the login page (Default is: 192.168.0.1)
@@ -35,40 +17,49 @@ Downloading the configuration file can be done by:
 
 Depending on your version, there may be a "Save Configuration" section of "Utilities" instead of in the firmware update section.
 
-## Openssl
-Newer versions of openssl may have errors running the decrypt command. You can change the config file `/etc/ssl/openssl.cnf` or provide your own config or programmatic settings to openssl and make sure these sections have these values. The legacy providers are disabled by default for good reason (https://github.com/openssl/openssl/blob/master/README-PROVIDERS.md).
+## Tested
 
-```bash
-openssl_conf = openssl_init
+This script was tested on a configuration file that was pulled from a router with firmware version: CZD005-4.16.011.0
 
-[openssl_init]
-providers = provider_sect
+You can download the firmware version here: http://internethelp.centurylink.com/internethelp/modems/c3000z/firmware/CZD005-4.16.011.0.bin
 
-[provider_sect]
-default = default_sect
-legacy = legacy_sect
+## Previous Script
 
-[default_sect]
-activate = 1
+The initial script was created in Python and used an older version of OpenSSL with Docker to decrypt the password. I have since switched to using Go and don't need to use OpenSSL. The original code can be found in the `python` directory
 
-[legacy_sect]
-activate = 1
+## Build
+
+Make sure you have Go installed and you can run `make` or the following command to build the binary.
+
+```go
+go build -o c3000z .
 ```
 
-Original command:
+## Run
+
+The program takes takes the data, key, and mode.
+
 ```bash
-openssl des -in <config file> -d -k C1000Z_1234 -a -md md5
+./c3000z -h            
+Usage of ./c3000z:
+  -data string
+        data to encrypt/decrypt
+  -key string
+        encryption key (default "C1000Z_1234")
+  -mode string
+        encrypt or decrypt the data (default "decrypt")
 ```
 
-Updated command:
+Example encrypting the password `password123`
+
 ```bash
-openssl des -provider legacy -in <config file> -d -k C1000Z_1234 -a -md md5
+./c3000z -data password123 -mode encrypt                                                 
+Encrypted: U2FsdGVkX1+BHNw4Gmt5UnZZiz4t0E1yXgOwGdR3w/U=
 ```
 
-## Credits
-Thanks to the people below who have helped identify bugs and recommend fixes!
+Example decrypting the output from before
 
-- [@zenfish](https://github.com/zenfish)
-- [@micahjon](https://github.com/micahjon)
-- [@surewould](https://github.com/surewould)
-- [@jludwig75](https://github.com/jludwig75)
+```bash
+./c3000z -data U2FsdGVkX1+BHNw4Gmt5UnZZiz4t0E1yXgOwGdR3w/U= -mode decrypt
+Decrypted: password123
+```
